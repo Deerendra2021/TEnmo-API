@@ -9,5 +9,7 @@ namespace TenmoServer.DAO
     public interface ITransferSqlDAO
     {
         Transfers MakeTransfer(Transfers newTransfer);
+
+        List<Transfers> ViewTransfers(int userId);
     }
 }

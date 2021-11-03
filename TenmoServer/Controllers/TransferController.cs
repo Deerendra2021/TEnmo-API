@@ -15,10 +15,14 @@ namespace TenmoServer.Controllers
     public class TransferController : ControllerBase
     {
         private readonly ITransferSqlDAO transferDAO;
+        private readonly IAccountSqlDAO accountDAO;
+        private readonly IUserDAO userDAO;
 
-        public TransferController(ITransferSqlDAO _transferDAO)
+        public TransferController(ITransferSqlDAO _transferDAO, IAccountSqlDAO _accountDAO, IUserDAO _userDAO)
         {
             this.transferDAO = _transferDAO;
+            this.accountDAO = _accountDAO;
+            this.userDAO = _userDAO;
         }
 
         [HttpPost]
@@ -26,6 +30,14 @@ namespace TenmoServer.Controllers
         public IActionResult MakeTransfer(Transfers newTransfer)
         {
             Transfers result = transferDAO.MakeTransfer(newTransfer);
+            return Ok(result);
+        }
+
+        [HttpGet("{userId}")]
+        [Authorize]
+        public IActionResult ViewTransfers(int userId)
+        {
+            List<Transfers> result = transferDAO.ViewTransfers(userId);
             return Ok(result);
         }
     }
