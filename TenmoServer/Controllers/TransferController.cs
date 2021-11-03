@@ -25,7 +25,8 @@ namespace TenmoServer.Controllers
         [Authorize]
         public IActionResult MakeTransfer(Transfers newTransfer)
         {
-            return Ok();
+            Transfers result = transferDAO.MakeTransfer(newTransfer);
+            return Ok(result);
         }
     }
 }

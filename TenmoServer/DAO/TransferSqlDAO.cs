@@ -20,7 +20,7 @@ namespace TenmoServer.DAO
             "(SELECT account_id FROM accounts a INNER JOIN users u ON u.user_id = a.user_id WHERE u.user_id = @fromUserId), " +
             "(SELECT account_id FROM accounts a INNER JOIN users u ON u.user_id = a.user_id WHERE u.user_id = @toUserId), " +
             "@amount) " +
-            "" +
+            "SELECT @@IDENTITY; " +
             "UPDATE accounts SET balance -= @amount WHERE user_id = @fromUserId; " +
             "UPDATE accounts SET balance += @amount WHERE user_id = @toUserId; ";
 
@@ -30,23 +30,25 @@ namespace TenmoServer.DAO
             connectionString = dbConnectionString;
         }
 
-        public Transfers MakeTransfer(int fromUserId, int toUserId, decimal amount)
+        public Transfers MakeTransfer(Transfers newTransfer)
         {
-            Transfers newTransfer = new Transfers
+            /*Transfers transfer = new Transfers
             {
-                Account_From = fromUserId,
-                Account_To = toUserId,
-                Amount = amount
-            };
+                Account_From = newTransfer.Account_From,
+                Account_To = newTransfer.Account_To,
+                Amount = newTransfer.Amount
+            };*/
+
+            
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
 
                 SqlCommand cmd = new SqlCommand(MakeTransferSql, conn);
-                cmd.Parameters.AddWithValue("@fromUserId", fromUserId);
-                cmd.Parameters.AddWithValue("@toUserId", toUserId);
-                cmd.Parameters.AddWithValue("@amount", amount);
+                cmd.Parameters.AddWithValue("@fromUserId", newTransfer.Account_From);
+                cmd.Parameters.AddWithValue("@toUserId", newTransfer.Account_To);
+                cmd.Parameters.AddWithValue("@amount", newTransfer.Amount);
 
                 newTransfer.Transfer_Id = Convert.ToInt32(cmd.ExecuteScalar());
             }
@@ -55,7 +57,7 @@ namespace TenmoServer.DAO
             {
                 conn.Open();
 
-                SqlCommand cmd = new SqlCommand("SELECT transfer_type_id, transfer_status_id FROM transfers WHERE transfer_id = @newTransferId");
+                SqlCommand cmd = new SqlCommand("SELECT transfer_type_id, transfer_status_id FROM transfers WHERE transfer_id = @newTransferId", conn);
                 cmd.Parameters.AddWithValue("@newTransferId", newTransfer.Transfer_Id);
                 SqlDataReader reader = cmd.ExecuteReader();
 
