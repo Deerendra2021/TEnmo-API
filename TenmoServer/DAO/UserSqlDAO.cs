@@ -79,6 +79,7 @@ namespace TenmoServer.DAO
 
                 cmd = new SqlCommand("SELECT @@IDENTITY", conn);
                 int userId = Convert.ToInt32(cmd.ExecuteScalar());
+                
 
                 cmd = new SqlCommand("INSERT INTO accounts (user_id, balance) VALUES (@userid, @startBalance)", conn);
                 cmd.Parameters.AddWithValue("@userid", userId);
