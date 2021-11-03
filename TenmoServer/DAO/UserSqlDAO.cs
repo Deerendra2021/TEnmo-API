@@ -100,5 +100,6 @@ namespace TenmoServer.DAO
                 Salt = Convert.ToString(reader["salt"]),
             };
         }
+
     }
 }
