@@ -34,7 +34,7 @@ namespace TenmoServer.DAO
             "u1.user_id AS accountFromUserId, " +
             "account_to, " +
             "u2.username AS accountToUserName, " +
-            "u2.user_id AS accountToUserId" +
+            "u2.user_id AS accountToUserId, " +
             "amount " +
             "FROM transfers t LEFT OUTER JOIN accounts acf ON acf.account_id = t.account_from " +
             "LEFT OUTER JOIN accounts act ON act.account_id = t.account_to " +

@@ -11,7 +11,7 @@ namespace TenmoClient
         private readonly ConsoleService consoleService = new ConsoleService();
         private readonly AuthService authService = new AuthService();
         private readonly TenmoApiClient tenmoApi = new TenmoApiClient();
-        
+
 
         private bool quitRequested = false;
 
@@ -80,7 +80,7 @@ namespace TenmoClient
                     switch (menuSelection)
                     {
                         case 1: // View Balance
-                            Console.WriteLine(); 
+                            Console.WriteLine();
                             GetAccounBalance();
                             break;
 
@@ -127,26 +127,53 @@ namespace TenmoClient
 
         private void DisplayUserTransfers()
         {
-            Console.WriteLine($"Transfers");
-            Console.WriteLine("ID   From/To         Amount");
-            Console.WriteLine("----------------------------");
+            bool keepGoing = true;
 
-            List<Transfer> userTransfers = tenmoApi.GetUserTransfers();
-
-            foreach (Transfer transfer in userTransfers)
+            while (keepGoing)
             {
-                if (transfer.accountFromUserId == UserService.UserId )
+                Console.WriteLine($"Transfers");
+                Console.WriteLine("ID   From/To         Amount");
+                Console.WriteLine("----------------------------");
+
+                List<Transfer> userTransfers = tenmoApi.GetUserTransfers();
+
+                foreach (Transfer transfer in userTransfers)
                 {
-                    Console.WriteLine($"{transfer.transfer_Id}      {transfer.accountToUserName}      {transfer.amount}");
+                    if (transfer.accountFromUserId == UserService.UserId)
+                    {
+                        Console.WriteLine($"{transfer.transfer_Id}      {transfer.accountToUserName}      {transfer.amount.ToString("C")}");
+                    }
+                    else if (transfer.accountFromUserId != UserService.UserId)
+                    {
+                        Console.WriteLine($"{transfer.transfer_Id}      {transfer.accountFromUserName}      {transfer.amount.ToString("C")}");
+                    }
                 }
-                else if (transfer.accountFromUserId != UserService.UserId)
+                Console.Write("Please enter transfer ID to view details (0 to cancel): ");
+                int input;
+                if (!int.TryParse(Console.ReadLine(), out input))
                 {
-                    Console.WriteLine($"{transfer.transfer_Id}      {transfer.accountFromUserName}      {transfer.amount}");
+                    Console.WriteLine("Invalid input. Please enter only a number.");
+                }
+                else if (input == 0)
+                {
+                    return;
+                }
+                else
+                {
+                    foreach (Transfer transfer in userTransfers)
+                    {
+                        if (transfer.transfer_Id == input)
+                        {
+                            DisplayTransferDetails(transfer);
+                        }
+                    }
                 }
             }
-            Console.Write("Please enter transfer ID to view details (0 to cancel): ");
-            int input;
-            int.TryParse(Console.ReadLine(), out input);
+        }
+
+        private void DisplayTransferDetails(Transfer transfers)
+        {
+            Console.WriteLine($"\nId: {transfers.transfer_Id}\n{transfers.accountFromUserName}\n{transfers.accountToUserName}\nType: Send\nStatus: Approved\nAmount: {transfers.amount.ToString("c")}");
         }
         private void HandleUserRegister()
         {
