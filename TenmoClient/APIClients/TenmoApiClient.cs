@@ -37,6 +37,25 @@ namespace TenmoClient.APIClients
 
         }
 
+        public List<SafeUsersDisplays> GetAllUsers()
+        {
+            RestRequest request = new RestRequest($"{API_URL}users");
+            request.AddHeader("Authorization", $"bearer {UserService.Token}");
+
+            IRestResponse<List<SafeUsersDisplays>> response = client.Get<List<SafeUsersDisplays>>(request);
+
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                Console.WriteLine("Could not communicate with the server");
+            }
+
+            if (!response.IsSuccessful)
+            {
+                Console.WriteLine("Could not get Users. Error status code " + response.StatusCode);
+            }
+            return response.Data;
+        }
+
         public List<Transfer> GetUserTransfers()
         {
             RestRequest request = new RestRequest($"{API_URL}transfer/{UserService.UserId}");
@@ -61,7 +80,8 @@ namespace TenmoClient.APIClients
 
         public Transfer PostUserTransfers(Transfer transfer)
         {
-            RestRequest request = new RestRequest($"{API_URL}/transfer");
+            RestRequest request = new RestRequest($"{API_URL}transfer");
+            request.AddHeader("Authorization", $"bearer {UserService.Token}");
             request.AddJsonBody(transfer);
 
             IRestResponse<Transfer> response = client.Post<Transfer>(request);

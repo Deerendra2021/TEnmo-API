@@ -15,8 +15,8 @@ namespace TenmoServer.Controllers
     public class TransferController : ControllerBase
     {
         private readonly ITransferSqlDAO transferDAO;
-        private readonly IAccountSqlDAO accountDAO;
-        private readonly IUserDAO userDAO;
+        private readonly IAccountSqlDAO accountDAO; // Not using these, consider deleting
+        private readonly IUserDAO userDAO; // Not using these, consider deleting
 
         public TransferController(ITransferSqlDAO _transferDAO, IAccountSqlDAO _accountDAO, IUserDAO _userDAO)
         {

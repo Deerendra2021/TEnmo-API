@@ -93,7 +93,7 @@ namespace TenmoClient
                             break;
 
                         case 4: // Send TE Bucks
-                            Console.WriteLine("NOT IMPLEMENTED!"); // TODO: Implement me
+                            SendTeBucks();
                             break;
 
                         case 5: // Request TE Bucks
@@ -174,6 +174,45 @@ namespace TenmoClient
         private void DisplayTransferDetails(Transfer transfers)
         {
             Console.WriteLine($"\nId: {transfers.transfer_Id}\n{transfers.accountFromUserName}\n{transfers.accountToUserName}\nType: Send\nStatus: Approved\nAmount: {transfers.amount.ToString("c")}");
+        }
+
+        private void SendTeBucks()
+        {
+            Console.WriteLine("------------------------------");
+            Console.WriteLine("Users");
+            Console.WriteLine("ID       Name");
+
+            List<SafeUsersDisplays> allUsers = tenmoApi.GetAllUsers();
+
+            foreach (SafeUsersDisplays user in allUsers)
+            {
+                Console.WriteLine($"{user.userId}       {user.username}");
+            }
+
+            Console.Write("Enter the ID of the user you are sending to (0 to cancel): ");
+            int userID;
+            if (!int.TryParse(Console.ReadLine(), out userID))
+            {
+                Console.WriteLine("Invalid input. Please enter only a number.");
+            }
+
+            Console.Write("Enter amount: ");
+
+            decimal amount;
+            if (!decimal.TryParse(Console.ReadLine(), out amount))
+            {
+                Console.WriteLine("Invalid input. Please enter only a number as a decimal, i.e 1.00");
+            }
+
+            Transfer transfer = new Transfer()
+            {
+                accountToUserId = userID,
+                accountFromUserId = UserService.UserId,
+                amount = amount
+            };
+            tenmoApi.PostUserTransfers(transfer);
+
+            Console.WriteLine("Your transfer has been completed!");
         }
         private void HandleUserRegister()
         {
