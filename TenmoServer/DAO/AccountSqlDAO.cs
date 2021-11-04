@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using TenmoServer.Models;
 
 namespace TenmoServer.DAO
 {
@@ -15,23 +16,30 @@ namespace TenmoServer.DAO
             connectionString = dbConnectionString;
         }
 
-        public decimal GetAccountBalance(int userId)
+        public Account GetAccountBalance(int userId)
         {
-            decimal accountBalance;
+            Account account = new Account();
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
 
-                SqlCommand cmd = new SqlCommand("SELECT balance FROM accounts WHERE user_id = @id", conn);
+                SqlCommand cmd = new SqlCommand("SELECT balance, user_id, account_id FROM accounts WHERE user_id = @id", conn);
 
                 cmd.Parameters.AddWithValue("@id", userId);
 
-                accountBalance = Convert.ToDecimal(cmd.ExecuteScalar());
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    account.Account_Balance = Convert.ToDecimal(reader["balance"]);
+                    account.Account_Id = Convert.ToInt32(reader["user_id"]);
+                    account.User_Id = Convert.ToInt32(reader["account_id"]);
+                }
 
             }
-            return accountBalance;
 
+            return account;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using TenmoClient.APIClients;
 using TenmoClient.Data;
 
 namespace TenmoClient
@@ -7,6 +8,7 @@ namespace TenmoClient
     {
         private readonly ConsoleService consoleService = new ConsoleService();
         private readonly AuthService authService = new AuthService();
+        private readonly TenmoApiClient tenmoApi = new TenmoApiClient();
 
         private bool quitRequested = false;
 
@@ -14,7 +16,7 @@ namespace TenmoClient
         {
             while (!quitRequested)
             {
-                while (!authService.IsLoggedIn)
+                while (!UserService.IsLoggedIn)
                 {
                     ShowLogInMenu();
                 }
@@ -75,7 +77,8 @@ namespace TenmoClient
                     switch (menuSelection)
                     {
                         case 1: // View Balance
-                            Console.WriteLine("NOT IMPLEMENTED!"); // TODO: Implement me
+                            Console.WriteLine(); 
+                            GetAccounBalance();
                             break;
 
                         case 2: // View Past Transfers
@@ -110,6 +113,13 @@ namespace TenmoClient
                     }
                 }
             } while (menuSelection != 0);
+        }
+
+        private void GetAccounBalance()
+        {
+            Account balance = tenmoApi.GetAccountBalance();
+
+            Console.WriteLine("Your currrent balance is: " + balance.Account_Balance.ToString("C"));
         }
 
         private void HandleUserRegister()

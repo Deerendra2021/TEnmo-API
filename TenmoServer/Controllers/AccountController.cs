@@ -25,9 +25,9 @@ namespace TenmoServer.Controllers
         [Authorize]
         public IActionResult AccountBalance(int userId)
         {
-            decimal balance = accountDao.GetAccountBalance(userId); 
+            Account account = accountDao.GetAccountBalance(userId); 
 
-            return Ok(balance);
+            return Ok(account.Account_Balance);
         }
     }
 }
