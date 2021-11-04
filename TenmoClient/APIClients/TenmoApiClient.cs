@@ -39,9 +39,8 @@ namespace TenmoClient.APIClients
 
         public List<Transfer> GetUserTransfers()
         {
-            client.Authenticator = new JwtAuthenticator(UserService.Token);
-
             RestRequest request = new RestRequest($"{API_URL}/transfer/{UserService.UserId}");
+            request.AddHeader("Authorization", $"bearer {UserService.Token}");
 
             IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
 

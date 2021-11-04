@@ -130,7 +130,7 @@ namespace TenmoClient
 
             foreach (Transfer transfer in userTransfers)
             {
-                Console.WriteLine($"")
+                Console.WriteLine($"");
             }
         }
         private void HandleUserRegister()
