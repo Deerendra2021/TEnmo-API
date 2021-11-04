@@ -25,15 +25,23 @@ namespace TenmoServer.DAO
             "UPDATE accounts SET balance += @amount WHERE user_id = @toUserId; ";
 
         private readonly string ViewTransferSql =
-            "SELECT transfer_id, " +
+            "SELECT " +
+            "transfer_id, " +
             "transfer_type_id, " +
             "transfer_status_id, " +
             "account_from, " +
+            "u1.username AS accountFromUserName, " +
+            "u1.user_id AS accountFromUserId, " +
             "account_to, " +
+            "u2.username AS accountToUserName, " +
+            "u2.user_id AS accountToUserId" +
             "amount " +
-            "FROM transfers t " +
-            "WHERE t.account_from = (SELECT account_id FROM accounts a INNER JOIN users u ON u.user_id = a.user_id WHERE u.user_id = @user_id) " +
-            "OR t.account_to = (SELECT account_id FROM accounts a INNER JOIN users u ON u.user_id = a.user_id WHERE u.user_id = @user_id)";
+            "FROM transfers t LEFT OUTER JOIN accounts acf ON acf.account_id = t.account_from " +
+            "LEFT OUTER JOIN accounts act ON act.account_id = t.account_to " +
+            "INNER JOIN users u1 ON u1.user_id = acf.user_id " +
+            "INNER JOIN users u2 ON u2.user_id = act.user_id " +
+            "WHERE t.account_from = (SELECT account_id FROM accounts acf LEFT OUTER JOIN users u ON u.user_id = acf.user_id WHERE u.user_id = @user_id) " +
+            "OR t.account_to = (SELECT account_id FROM accounts act LEFT OUTER JOIN users u ON u.user_id = act.user_id WHERE u.user_id = @user_id)";
 
 
         public TransferSqlDAO(string dbConnectionString)
@@ -102,7 +110,11 @@ namespace TenmoServer.DAO
                         Transfers_Type_Id = Convert.ToInt32(reader["transfer_type_id"]),
                         Transfers_Status_Id = Convert.ToInt32(reader["transfer_status_id"]),
                         Account_From = Convert.ToInt32(reader["account_from"]),
+                        AccountFromUserName = "From: " + Convert.ToString(reader["accountFromUserName"]),
+                        AccountFromUserId = Convert.ToInt32(reader["accountFromUserId"]),
                         Account_To = Convert.ToInt32(reader["account_to"]),
+                        AccountToUserName = "To: " + Convert.ToString(reader["accountToUserName"]),
+                        AccountToUserId = Convert.ToInt32(reader["accountToUserId"]),
                         Amount = Convert.ToDecimal(reader["amount"])
                     };
                     userTransfers.Add(transfer);

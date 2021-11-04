@@ -11,6 +11,7 @@ namespace TenmoClient
         private readonly ConsoleService consoleService = new ConsoleService();
         private readonly AuthService authService = new AuthService();
         private readonly TenmoApiClient tenmoApi = new TenmoApiClient();
+        
 
         private bool quitRequested = false;
 
@@ -84,7 +85,7 @@ namespace TenmoClient
                             break;
 
                         case 2: // View Past Transfers
-                            Console.WriteLine("NOT IMPLEMENTED!"); // TODO: Implement me
+                            DisplayUserTransfers();
                             break;
 
                         case 3: // View Pending Requests
@@ -126,12 +127,26 @@ namespace TenmoClient
 
         private void DisplayUserTransfers()
         {
+            Console.WriteLine($"Transfers");
+            Console.WriteLine("ID   From/To         Amount");
+            Console.WriteLine("----------------------------");
+
             List<Transfer> userTransfers = tenmoApi.GetUserTransfers();
 
             foreach (Transfer transfer in userTransfers)
             {
-                Console.WriteLine($"");
+                if (transfer.accountFromUserId == UserService.UserId )
+                {
+                    Console.WriteLine($"{transfer.transfer_Id}      {transfer.accountToUserName}      {transfer.amount}");
+                }
+                else if (transfer.accountFromUserId != UserService.UserId)
+                {
+                    Console.WriteLine($"{transfer.transfer_Id}      {transfer.accountFromUserName}      {transfer.amount}");
+                }
             }
+            Console.Write("Please enter transfer ID to view details (0 to cancel): ");
+            int input;
+            int.TryParse(Console.ReadLine(), out input);
         }
         private void HandleUserRegister()
         {
