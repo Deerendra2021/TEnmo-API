@@ -54,6 +54,7 @@ namespace TenmoServer.DAO
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
+
                 conn.Open();
 
                 SqlCommand cmd = new SqlCommand(MakeTransferSql, conn);

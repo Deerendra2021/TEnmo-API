@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using TenmoClient.Data;
 using RestSharp.Authenticators;
+using System.Linq;
 
 namespace TenmoClient.APIClients
 {
@@ -16,7 +17,7 @@ namespace TenmoClient.APIClients
         public Account GetAccountBalance()
         {
             RestRequest request = new RestRequest($"{API_URL}account/{UserService.UserId}");
-            request.AddHeader("Authorization",$"bearer{UserService.Token}");
+            request.AddHeader("Authorization", $"bearer {UserService.Token}");
 
             IRestResponse<Account> response = client.Get<Account>(request);
 

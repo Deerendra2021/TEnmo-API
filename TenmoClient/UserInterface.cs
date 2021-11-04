@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using TenmoClient.APIClients;
 using TenmoClient.Data;
+using System.Linq;
 
 namespace TenmoClient
 {
@@ -119,9 +121,18 @@ namespace TenmoClient
         {
             Account balance = tenmoApi.GetAccountBalance();
 
-            Console.WriteLine("Your currrent balance is: " + balance.Account_Balance.ToString("C"));
+            Console.WriteLine("Your currrent balance is: " + balance.account_Balance.ToString("C"));
         }
 
+        private void DisplayUserTransfers()
+        {
+            List<Transfer> userTransfers = tenmoApi.GetUserTransfers();
+
+            foreach (Transfer transfer in userTransfers)
+            {
+                Console.WriteLine($"")
+            }
+        }
         private void HandleUserRegister()
         {
             bool isRegistered = false;

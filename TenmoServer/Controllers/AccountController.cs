@@ -27,7 +27,7 @@ namespace TenmoServer.Controllers
         {
             Account account = accountDao.GetAccountBalance(userId); 
 
-            return Ok(account.Account_Balance);
+            return Ok(account);
         }
     }
 }

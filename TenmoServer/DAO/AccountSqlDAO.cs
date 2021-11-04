@@ -33,8 +33,8 @@ namespace TenmoServer.DAO
                 while (reader.Read())
                 {
                     account.Account_Balance = Convert.ToDecimal(reader["balance"]);
-                    account.Account_Id = Convert.ToInt32(reader["user_id"]);
-                    account.User_Id = Convert.ToInt32(reader["account_id"]);
+                    account.Account_Id = Convert.ToInt32(reader["account_id"]);
+                    account.User_Id = Convert.ToInt32(reader["user_id"]);
                 }
 
             }
