@@ -30,6 +30,14 @@ namespace TenmoServer.Controllers
         public IActionResult MakeTransfer(Transfers newTransfer)
         {
             Transfers result = transferDAO.MakeTransfer(newTransfer);
+
+            int userId = int.Parse(this.User.FindFirst("sub").Value);
+
+            if (userId == newTransfer.AccountToUserId)
+            {
+                return BadRequest("You cannot transfer money from other people's account to your own account");
+            }
+
             return Ok(result);
         }
 
