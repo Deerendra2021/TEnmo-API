@@ -57,15 +57,16 @@ namespace TenmoClient
         private void ShowMainMenu()
         {
             int menuSelection;
+            Console.WriteLine();
+            Console.WriteLine("Welcome to TEnmo! Please make a selection: ");
             do
             {
                 Console.WriteLine();
-                Console.WriteLine("Welcome to TEnmo! Please make a selection: ");
                 Console.WriteLine("1: View your current balance");
                 Console.WriteLine("2: View your past transfers");
-                Console.WriteLine("3: View your pending requests");
+                Console.WriteLine("3: View your pending requests // Feature coming soon!");
                 Console.WriteLine("4: Send TE bucks");
-                Console.WriteLine("5: Request TE bucks");
+                Console.WriteLine("5: Request TE bucks // Feature coming soon!");
                 Console.WriteLine("6: Log in as different user");
                 Console.WriteLine("0: Exit");
                 Console.WriteLine("---------");
@@ -148,6 +149,7 @@ namespace TenmoClient
                         Console.WriteLine($"{transfer.transfer_Id}      {transfer.accountFromUserName}      {transfer.amount.ToString("C")}");
                     }
                 }
+                Console.WriteLine("---------");
                 Console.Write("Please enter transfer ID to view details (0 to cancel): ");
                 int input;
                 if (!int.TryParse(Console.ReadLine(), out input))
@@ -186,33 +188,58 @@ namespace TenmoClient
 
             foreach (SafeUsersDisplays user in allUsers)
             {
-                Console.WriteLine($"{user.userId}       {user.username}");
+                if (user.userId != UserService.UserId)
+                {
+                    Console.WriteLine($"{user.userId}       {user.username}");
+                }
             }
-
-            Console.Write("Enter the ID of the user you are sending to (0 to cancel): ");
+            Console.WriteLine("------");
+            Console.Write("\nEnter the ID of the user you are sending to (0 to cancel): ");
             int userID;
             if (!int.TryParse(Console.ReadLine(), out userID))
             {
                 Console.WriteLine("Invalid input. Please enter only a number.");
             }
 
-            Console.Write("Enter amount: ");
-
-            decimal amount;
-            if (!decimal.TryParse(Console.ReadLine(), out amount))
+            if (userID == 0)
             {
-                Console.WriteLine("Invalid input. Please enter only a number as a decimal, i.e 1.00");
+                return;
             }
 
-            Transfer transfer = new Transfer()
+            if (userID == UserService.UserId)
             {
-                accountToUserId = userID,
-                accountFromUserId = UserService.UserId,
-                amount = amount
-            };
-            tenmoApi.PostUserTransfers(transfer);
+                Console.WriteLine("Why are you trying to send money from yourself to yourself? No...just no.");
+                return;
+            }
 
-            Console.WriteLine("Your transfer has been completed!");
+            decimal amount;
+
+            Account balanceCheck = tenmoApi.GetAccountBalance();
+
+            do
+            {
+                Console.Write("Enter amount: ");
+                if (!decimal.TryParse(Console.ReadLine(), out amount))
+                {
+                    Console.WriteLine("Invalid input. Please enter only a number as a decimal, i.e 1.00");
+                }
+
+
+                if (amount > balanceCheck.account_Balance)
+                {
+                    Console.WriteLine($"You do not have enough funds to make this transfer. Your balance is {balanceCheck.account_Balance.ToString("C")}");
+                }
+            } while (amount > balanceCheck.account_Balance);
+
+
+            Transfer transfer = new Transfer()
+                {
+                    accountToUserId = userID,
+                    accountFromUserId = UserService.UserId,
+                    amount = amount
+                };
+                tenmoApi.PostUserTransfers(transfer);
+            Console.WriteLine("\nYour transfer has been completed!");
         }
         private void HandleUserRegister()
         {

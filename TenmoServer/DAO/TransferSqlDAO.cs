@@ -66,8 +66,8 @@ namespace TenmoServer.DAO
                 conn.Open();
 
                 SqlCommand cmd = new SqlCommand(MakeTransferSql, conn);
-                cmd.Parameters.AddWithValue("@fromUserId", newTransfer.Account_From);
-                cmd.Parameters.AddWithValue("@toUserId", newTransfer.Account_To);
+                cmd.Parameters.AddWithValue("@fromUserId", newTransfer.AccountFromUserId);
+                cmd.Parameters.AddWithValue("@toUserId", newTransfer.AccountToUserId);
                 cmd.Parameters.AddWithValue("@amount", newTransfer.Amount);
 
                 newTransfer.Transfer_Id = Convert.ToInt32(cmd.ExecuteScalar());
