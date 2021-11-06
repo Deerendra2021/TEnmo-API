@@ -133,14 +133,14 @@ namespace TenmoClient
             while (keepGoing)
             {
                 Console.WriteLine($"Transfers");
-                Console.WriteLine("ID   From/To         Amount");
+                Console.WriteLine("ID      From/To         Amount");
                 Console.WriteLine("----------------------------");
 
                 List<Transfer> userTransfers = tenmoApi.GetUserTransfers();
 
                 foreach (Transfer transfer in userTransfers)
                 {
-                    if (transfer.accountFromUserId == UserService.UserId)
+                    if (transfer.accountFromUserId == UserService.UserId) // The following if statements are used to properly display From/To
                     {
                         Console.WriteLine($"{transfer.transfer_Id}      {transfer.accountToUserName}      {transfer.amount.ToString("C")}");
                     }
@@ -175,7 +175,8 @@ namespace TenmoClient
 
         private void DisplayTransferDetails(Transfer transfers)
         {
-            Console.WriteLine($"\nId: {transfers.transfer_Id}\n{transfers.accountFromUserName}\n{transfers.accountToUserName}\nType: Send\nStatus: Approved\nAmount: {transfers.amount.ToString("c")}");
+            Console.WriteLine($"\nId: {transfers.transfer_Id}\n{transfers.accountFromUserName}\n{transfers.accountToUserName}\nType: Send" +
+                $"\nStatus: Approved\nAmount: {transfers.amount:c}");
         }
 
         private void SendTeBucks()
@@ -195,8 +196,7 @@ namespace TenmoClient
             }
             Console.WriteLine("------");
             Console.Write("\nEnter the ID of the user you are sending to (0 to cancel): ");
-            int userID;
-            if (!int.TryParse(Console.ReadLine(), out userID))
+            if (!int.TryParse(Console.ReadLine(), out int userID))
             {
                 Console.WriteLine("Invalid input. Please enter only a number.");
             }
@@ -213,8 +213,7 @@ namespace TenmoClient
             }
 
             decimal amount;
-
-            Account balanceCheck = tenmoApi.GetAccountBalance();
+            Account balanceCheck = tenmoApi.GetAccountBalance(); // Need to use Account object when pulling from the Api
 
             do
             {
@@ -224,21 +223,22 @@ namespace TenmoClient
                     Console.WriteLine("Invalid input. Please enter only a number as a decimal, i.e 1.00");
                 }
 
-
                 if (amount > balanceCheck.account_Balance)
                 {
                     Console.WriteLine($"You do not have enough funds to make this transfer. Your balance is {balanceCheck.account_Balance.ToString("C")}");
                 }
-            } while (amount > balanceCheck.account_Balance);
+
+            } while (amount > balanceCheck.account_Balance); //This do/while ensures that the user doesn't overwithdrawl their account
 
 
             Transfer transfer = new Transfer()
-                {
-                    accountToUserId = userID,
-                    accountFromUserId = UserService.UserId,
-                    amount = amount
-                };
-                tenmoApi.PostUserTransfers(transfer);
+            {
+                accountToUserId = userID,
+                accountFromUserId = UserService.UserId,
+                amount = amount
+            };
+            
+            tenmoApi.PostUserTransfers(transfer);
             Console.WriteLine("\nYour transfer has been completed!");
         }
         private void HandleUserRegister()

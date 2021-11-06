@@ -15,7 +15,11 @@ namespace TenmoServer.DAO
         {
             connectionString = dbConnectionString;
         }
-
+        /// <summary>
+        /// Pulls account balance of logged in user from database
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public Account GetAccountBalance(int userId)
         {
             Account account = new Account();

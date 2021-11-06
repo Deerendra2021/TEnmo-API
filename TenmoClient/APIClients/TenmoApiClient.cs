@@ -13,7 +13,6 @@ namespace TenmoClient.APIClients
         private const string API_URL = "https://localhost:44315/";
         private readonly RestClient client = new RestClient();
 
-
         public Account GetAccountBalance()
         {
             RestRequest request = new RestRequest($"{API_URL}account/{UserService.UserId}");

@@ -15,16 +15,16 @@ namespace TenmoServer.Controllers
     public class TransferController : ControllerBase
     {
         private readonly ITransferSqlDAO transferDAO;
-        private readonly IAccountSqlDAO accountDAO; // Not using these, consider deleting
-        private readonly IUserDAO userDAO; // Not using these, consider deleting
 
-        public TransferController(ITransferSqlDAO _transferDAO, IAccountSqlDAO _accountDAO, IUserDAO _userDAO)
+        public TransferController(ITransferSqlDAO _transferDAO)
         {
             this.transferDAO = _transferDAO;
-            this.accountDAO = _accountDAO;
-            this.userDAO = _userDAO;
         }
-
+        /// <summary>
+        /// Completes a transfer and uploads it to the database
+        /// </summary>
+        /// <param name="newTransfer"></param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize]
         public IActionResult MakeTransfer(Transfers newTransfer)
@@ -33,14 +33,17 @@ namespace TenmoServer.Controllers
 
             int userId = int.Parse(this.User.FindFirst("sub").Value);
 
-            if (userId == newTransfer.AccountToUserId)
+            if (userId != newTransfer.AccountFromUserId)
             {
-                return BadRequest("You cannot transfer money from other people's account to your own account");
+                return StatusCode(403, "You cannot transfer money from other people's account to your own account");
             }
-
-            return Ok(result);
+            return StatusCode(201, result);
         }
-
+        /// <summary>
+        /// Returns all transfers associated with logged in user
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         [HttpGet("{userId}")]
         [Authorize]
         public IActionResult ViewTransfers(int userId)

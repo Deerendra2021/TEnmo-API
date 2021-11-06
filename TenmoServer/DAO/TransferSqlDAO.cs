@@ -23,6 +23,8 @@ namespace TenmoServer.DAO
             "SELECT @@IDENTITY; " +
             "UPDATE accounts SET balance -= @amount WHERE user_id = @fromUserId; " +
             "UPDATE accounts SET balance += @amount WHERE user_id = @toUserId; ";
+        private readonly string AccountBalanceCheckSql =
+            "SELECT balance FROM accounts WHERE user_id = @user_id"; 
 
         private readonly string ViewTransferSql =
             "SELECT " +
@@ -51,41 +53,81 @@ namespace TenmoServer.DAO
 
         public Transfers MakeTransfer(Transfers newTransfer)
         {
-            /*Transfers transfer = new Transfers
+            try
             {
-                Account_From = newTransfer.Account_From,
-                Account_To = newTransfer.Account_To,
-                Amount = newTransfer.Amount
-            };*/
+                decimal balanceCheck;
 
-            
+                using (SqlConnection conn = new SqlConnection(connectionString)) // This first using statement is to defend against fradulent transfers made in Postman.
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(AccountBalanceCheckSql, conn);
+                    cmd.Parameters.AddWithValue("@user_id", newTransfer.AccountFromUserId);
+                    balanceCheck = Convert.ToDecimal(cmd.ExecuteScalar());
+                }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
+                if (balanceCheck < newTransfer.Amount)
+                {
+                    newTransfer.AccountFromUserName = "Not enough money in this account. Stop playing around with Postman";
+                    return newTransfer;
+                }
 
-                conn.Open();
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
 
-                SqlCommand cmd = new SqlCommand(MakeTransferSql, conn);
-                cmd.Parameters.AddWithValue("@fromUserId", newTransfer.AccountFromUserId);
-                cmd.Parameters.AddWithValue("@toUserId", newTransfer.AccountToUserId);
-                cmd.Parameters.AddWithValue("@amount", newTransfer.Amount);
+                    conn.Open();
 
-                newTransfer.Transfer_Id = Convert.ToInt32(cmd.ExecuteScalar());
+                    SqlCommand cmd = new SqlCommand(MakeTransferSql, conn);
+                    cmd.Parameters.AddWithValue("@fromUserId", newTransfer.AccountFromUserId);
+                    cmd.Parameters.AddWithValue("@toUserId", newTransfer.AccountToUserId);
+                    cmd.Parameters.AddWithValue("@amount", newTransfer.Amount);
+
+                    newTransfer.Transfer_Id = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+
+                using (SqlConnection conn = new SqlConnection(connectionString)) 
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand("SELECT transfer_type_id, transfer_status_id FROM transfers WHERE transfer_id = @newTransferId", conn);
+                    cmd.Parameters.AddWithValue("@newTransferId", newTransfer.Transfer_Id);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        newTransfer.Transfers_Type_Id = Convert.ToInt32(reader["transfer_type_id"]);
+                        newTransfer.Transfers_Status_Id = Convert.ToInt32(reader["transfer_status_id"]);
+                    }
+                }
             }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            catch(Exception ex)
             {
-                conn.Open();
+                Console.WriteLine(ex.Message);
+                Transfers badTransferRequest = new Transfers();
+                badTransferRequest.AccountFromUserName = "Please stop attacking our server through Postman. Your account has been flagged for review";
 
-                SqlCommand cmd = new SqlCommand("SELECT transfer_type_id, transfer_status_id FROM transfers WHERE transfer_id = @newTransferId", conn);
-                cmd.Parameters.AddWithValue("@newTransferId", newTransfer.Transfer_Id);
-                SqlDataReader reader = cmd.ExecuteReader();
+                // The code below is the beginning of an idea to log potential bad actors or potentially hacked accounts who may try to crash the server through repeteadly entering in bogus requests through Postman.
 
-                while (reader.Read())
+                // The idea is to allow the request to go through but store it in a seperate dummy server and flagged the accounts associated with the Postman requests for review
+
+                /*badTransferRequest.AccountFromUserId = newTransfer.AccountFromUserId;
+                badTransferRequest.AccountToUserId = newTransfer.AccountToUserId;
+                badTransferRequest.Amount = newTransfer.Amount;
+
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    newTransfer.Transfers_Type_Id = Convert.ToInt32(reader["transfer_type_id"]);
-                    newTransfer.Transfers_Status_Id = Convert.ToInt32(reader["transfer_status_id"]);
-                }
+
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(MakeTransferSql, conn);
+                    cmd.Parameters.AddWithValue("@fromUserId", badTransferRequest.AccountFromUserId);
+                    cmd.Parameters.AddWithValue("@toUserId", badTransferRequest.AccountToUserId);
+                    cmd.Parameters.AddWithValue("@amount", badTransferRequest.Amount);
+
+                    badTransferRequest.Transfer_Id = Convert.ToInt32(cmd.ExecuteScalar());
+                }*/
+
+                return badTransferRequest;
             }
             return newTransfer;
         }
@@ -104,8 +146,8 @@ namespace TenmoServer.DAO
 
                 while (reader.Read())
                 {
-                    Transfers transfer = new Transfers() 
-                    { 
+                    Transfers transfer = new Transfers()
+                    {
                         Transfer_Id = Convert.ToInt32(reader["transfer_id"]),
                         Transfers_Type_Id = Convert.ToInt32(reader["transfer_type_id"]),
                         Transfers_Status_Id = Convert.ToInt32(reader["transfer_status_id"]),
